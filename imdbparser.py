@@ -46,7 +46,7 @@ args = parser.parse_args()
 if args.mode:
     mode = args.mode
 else: #default
-    mode = "TSV"
+    mode = "JSON"
 
 if args.input_dir:
     input_dir = args.input_dir
@@ -82,7 +82,7 @@ if args.update_lists:
 
 logging.info("Parsing, please wait. This may take very long time...")
 
-ParsingHelper.parse_all(preferences_map)
+ParsingHelper.parse_one("soundtrack", preferences_map)
 
 logging.info("Check out output folder: %s", output_dir)
 print ("All done, enjoy ;)") #don't print this via logger, this is part of the program

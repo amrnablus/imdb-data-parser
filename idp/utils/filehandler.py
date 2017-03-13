@@ -35,6 +35,9 @@ class FileHandler(object):
     def sql_path(self):
         return os.path.join(self.preferences_map['output_dir'], self.list_name) + ".sql"
 
+    def json_path(self):
+        return os.path.join(self.preferences_map['output_dir'], self.list_name) + ".json"
+
     def get_input_file(self):
         full_file_path = self.full_path()
         logging.info("Trying to find file: %s", full_file_path)
@@ -70,6 +73,9 @@ class FileHandler(object):
     def get_sql_file(self):
         return open(self.sql_path(), "w", encoding='utf-8')
 
+    def get_json_file(self):
+        return open(self.json_path(), "w", encoding="utf-8")
+    
     def extract(gzip_path):
         try:
             logging.info("Started to extract list: %s", gzip_path)

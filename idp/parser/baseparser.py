@@ -48,9 +48,12 @@ class BaseParser(metaclass=ABCMeta):
         self.mode = preferences_map['mode']
         self.filehandler = FileHandler(self.input_file_name, preferences_map)
         self.input_file = self.filehandler.get_input_file()
+        self.line = ""
 
         if (self.mode == "TSV"):
           self.tsv_file = self.filehandler.get_tsv_file()
+        elif (self.mode == "JSON"):
+          self.json_file = self.filehandler.get_json_file()    
         elif (self.mode == "SQL"):
           self.sql_file = self.filehandler.get_sql_file()
           self.scripthelper = DbScriptHelper(self.db_table_info)
@@ -76,13 +79,13 @@ class BaseParser(metaclass=ABCMeta):
         counter = 0
         number_of_processed_lines = 0
 
-        for line in self.input_file : #assuming the file is opened in the subclass before here
+        for self.line in self.input_file : #assuming the file is opened in the subclass before here
             if(number_of_processed_lines >= self.number_of_lines_to_be_skipped):
                 #end of data
-                if(self.end_of_dump_delimiter != "" and self.end_of_dump_delimiter in line):
+                if(self.end_of_dump_delimiter != "" and self.end_of_dump_delimiter in self.line):
                     break
 
-                matcher = RegExHelper(line)
+                matcher = RegExHelper(self.line)
 
                 if(self.mode == "TSV"):
                     '''
@@ -93,7 +96,8 @@ class BaseParser(metaclass=ABCMeta):
                 elif(self.mode == "SQL"):
                     self.parse_into_db(matcher)
                 else:
-                    raise NotImplemented("Mode: " + self.mode)
+                    self.parse_into_tsv(matcher)
+#                     raise NotImplemented("Mode: " + self.mode)
 
             number_of_processed_lines +=  1
 
