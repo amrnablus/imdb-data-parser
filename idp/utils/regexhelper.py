@@ -23,7 +23,7 @@ class RegExHelper(object):
         self.matchstring = matchstring
 
     def match(self,regexp):
-        self.rematch = re.match(regexp, self.matchstring)
+        self.rematch = re.match(regexp, self.matchstring, re.IGNORECASE)
         return bool(self.rematch)
 
     def group(self,i):

@@ -64,6 +64,10 @@ class SoundtrackParser(BaseParser):
         self.first_one = True
         self.current_movie = False
         self.current_track = False
+        self.strip_map = lambda x, y: (y.strip())
+        self.strip_list = lambda x: (x.strip())
+        self.current_index = 0
+
         self.data = {}
 
     def parse_into_tsv(self, matcher):
@@ -76,6 +80,7 @@ class SoundtrackParser(BaseParser):
         logging.debug("Line: " + self.line)
         if self.line.startswith("#"):
             self.current_movie = self.current_track = False
+            self.current_index = 0
             
 #         self.data[self.current_movie] = {}
         
@@ -103,10 +108,16 @@ class SoundtrackParser(BaseParser):
             matches = False
             if self.current_movie: 
                 #meaning, this is a song info
-                if self.line.startswith('- "'):
-                    self.current_track = self.handle_track_name()
-                    self.data[self.current_movie][self.current_track] = {}
-                    
+                if self.line.startswith('- '):
+                    self.current_track = {"name": self.handle_track_name() }
+                    # self.data[self.current_movie][self.current_track] = {}
+                    type = "song"
+                    if self.current_index == 0:
+                        self.data[self.current_movie]['tracks'] = []
+
+                    self.current_index += 1
+                    self.data[self.current_movie]['tracks'].append(self.current_track)
+
                 if self.line.lower().find('written by') != -1:
                     type = "written"
                     matches = self.handle_star_by()
@@ -125,14 +136,22 @@ class SoundtrackParser(BaseParser):
                 if self.line.lower().find('lyric') != -1:
                     type = "lyrics"
                     matches = self.handle_star_by()
+                if self.line.lower().strip().startswith('by'):
+                    type = "by"
+                    matches = self.handle_star_by()
+                if self.line.lower().find('composed by') != -1:
+                    type = "composed"
+                    matches = self.handle_star_by()
             
-                strip = lambda x, y: (y.strip())
 
                 if  isinstance(matches, dict):
-                    matches = dict(map(strip, matches.iteritems()))
+                    matches = dict(map(self.strip_map, matches.iteritems()))
+
+                if  isinstance(matches, list):
+                    matches = list(map(self.strip_list, matches))
 
                 if self.current_movie and self.current_track and matches:
-                    self.data[self.current_movie][self.current_track][type] = matches[1:]
+                    self.data[self.current_movie]['tracks'][self.current_index-1][type] = matches[1:]
 
                 if type == "fucked":
                     self.fucked_up_count += 1
